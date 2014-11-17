@@ -10,16 +10,16 @@ CKEDITOR.plugins.add('wordcount', {
         var defaultFormat = '',
             intervalId,
             lastWordCount,
-            lastCharCount = 0; /*,
+            lastCharCount = 0,
             limitReachedNotified = false,
-            limitRestoredNotified = false;*/
+            limitRestoredNotified = false;
 
         // Default Config
         var defaultConfig = {
             showWordCount: true,
             showCharCount: false,
             countSpacesAsChars: false,
-            //charLimit: 'unlimited',
+            charLimit: 'unlimited',
             //wordLimit: 'unlimited',
             countHTML: false
         };
@@ -32,9 +32,9 @@ CKEDITOR.plugins.add('wordcount', {
 
             defaultFormat += charLabel + ' %charCount%';
 
-            /*if (config.charLimit != 'unlimited') {
+            if (config.charLimit != 'unlimited') {
                 defaultFormat += '&nbsp;(' + editor.lang.wordcount.limit + '&nbsp;' + config.charLimit + ')';
-            }*/
+            }
         }
 
         if (config.showCharCount && config.showWordCount) {
@@ -44,9 +44,9 @@ CKEDITOR.plugins.add('wordcount', {
         if (config.showWordCount) {
             defaultFormat += editor.lang.wordcount.WordCount + ' %wordCount%';
 
-            /*if (config.wordLimit != 'unlimited') {
+            if (config.wordLimit != 'unlimited') {
                 defaultFormat += '&nbsp;(' + editor.lang.wordcount.limit + '&nbsp;' + config.wordLimit + ')';
-            }*/
+            }
         }
 
         //defaultFormat += '</span>';
@@ -159,45 +159,49 @@ CKEDITOR.plugins.add('wordcount', {
                 }*/
 
                 // Check for char limit
-                /*if (config.showCharCount && charCount > config.charLimit) {
+                if (config.showCharCount && charCount > config.charLimit) {
                     limitReached(editor, limitReachedNotified);
                 } else if (config.showCharCount && charCount == config.charLimit) {
                     // create snapshot to make sure only the content after the limit gets deleted
-                    editorInstance.fire('saveSnapshot');
+                    editorInstance.lastValidValue = editorInstance.getData();
                 } else if (!limitRestoredNotified && charCount < config.charLimit) {
                     limitRestored(editor);
-                }*/
+                }
             }
 
-            
+
 
             return true;
         }
 
-        /*function limitReached(editorInstance, notify) {
+        function limitReached(editorInstance, notify) {
             limitReachedNotified = true;
             limitRestoredNotified = false;
 
-            editorInstance.execCommand('undo');
+            //TODO: keep cursor position
+            if(editorInstance.lastValidValue){
+                editorInstance.setData(editorInstance.lastValidValue);
+            }
+
 
             if (!notify) {
-               //counterElement(editorInstance).className = "cke_wordcount cke_wordcountLimitReached";
-                
+               counterElement(editorInstance).className = "cke_wordcount cke_wordcountLimitReached";
+
                editorInstance.fire('limitReached', {}, editor);
             }
-            
+
             // lock editor
             editorInstance.config.Locked = 1;
         }
 
         function limitRestored(editorInstance) {
-            
+
             limitRestoredNotified = true;
             limitReachedNotified = false;
             editorInstance.config.Locked = 0;
-			
+
             counterElement(editorInstance).className = "cke_wordcount";
-        }*/
+        }
 
         editor.on('key', function(event) {
             if (editor.mode === 'source') {
@@ -230,12 +234,12 @@ CKEDITOR.plugins.add('wordcount', {
         editor.on('afterPaste', function(event) {
             updateCounter(event.editor);
         }, editor, null, 100);
-        /*editor.on('focus', function (event) {
+        editor.on('focus', function (event) {
             editorHasFocus = true;
             intervalId = window.setInterval(function () {
                 updateCounter(editor);
             }, 300, event.editor);
-        }, editor, null, 300);*/
+        }, editor, null, 300);
         editor.on('blur', function() {
             if (intervalId) {
                 window.clearInterval(intervalId);
